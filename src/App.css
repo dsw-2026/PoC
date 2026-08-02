@@ -182,3 +182,21 @@
     border-right-color: var(--border);
   }
 }
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+li span {
+  flex: 1;
+  text-align: left;
+  /* corta la herencia del ancestro */
+}

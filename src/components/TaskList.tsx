@@ -1,34 +1,16 @@
-import { useState, useEffect } from "react";
 import type { Tarea, ActualizarTarea } from "../types/Tarea";
-import { tareasApi } from "../api/tareas";
 import { TaskItem } from "./TaskItem";
 
-export function TaskList() {
-  const [tareas, setTareas] = useState<Tarea[]>([]);
-  const [cargando, setCargando] = useState(true);
+interface TaskListProps {
+  tareas: Tarea[];
+  onEditar: (id: string, cambios: ActualizarTarea) => void;
+  onEliminar: (id: string) => void;
+}
 
-  useEffect(() => {
-    tareasApi.listar()
-      .then((datos) => setTareas(datos))
-      .finally(() => setCargando(false));
-  }, []);
-
-  async function manejarEditar(id: string, cambios: ActualizarTarea) {
-    const tareaActualizada = await tareasApi.actualizar(id, cambios);
-    setTareas((prev) =>
-      prev.map((t) => (t.id === id ? tareaActualizada : t))
-    );
+export function TaskList({ tareas, onEditar, onEliminar }: TaskListProps) {
+  if (tareas.length === 0) {
+    return <p>No hay tareas para mostrar.</p>;
   }
-
-  async function manejarEliminar(id: string) {
-    const confirmar = window.confirm("¿Seguro que querés eliminar esta tarea?");
-    if (!confirmar) return;
-
-    await tareasApi.eliminar(id);
-    setTareas((prev) => prev.filter((t) => t.id !== id));
-  }
-
-  if (cargando) return <p>Cargando tareas...</p>;
 
   return (
     <ul>
@@ -36,8 +18,8 @@ export function TaskList() {
         <TaskItem
           key={tarea.id}
           tarea={tarea}
-          onEditar={manejarEditar}
-          onEliminar={manejarEliminar}
+          onEditar={onEditar}
+          onEliminar={onEliminar}
         />
       ))}
     </ul>

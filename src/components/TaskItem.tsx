@@ -11,13 +11,25 @@ export function TaskItem({ tarea, onEditar, onEliminar }: TaskItemProps) {
   const [enEdicion, setEnEdicion] = useState(false);
   const [tituloEditado, setTituloEditado] = useState(tarea.titulo);
 
+  const estaCompletada = tarea.estado === "completada";
+
   function guardarEdicion() {
     onEditar(tarea.id, { titulo: tituloEditado });
     setEnEdicion(false);
   }
 
+  function alternarEstado() {
+    onEditar(tarea.id, { estado: estaCompletada ? "pendiente" : "completada" });
+  }
+
   return (
     <li>
+      <input
+        type="checkbox"
+        checked={estaCompletada}
+        onChange={alternarEstado}
+        aria-label={`Marcar "${tarea.titulo}" como ${estaCompletada ? "pendiente" : "completada"}`}
+      />
       {enEdicion ? (
         <>
           <input
@@ -29,7 +41,9 @@ export function TaskItem({ tarea, onEditar, onEliminar }: TaskItemProps) {
         </>
       ) : (
         <>
-          <span>{tarea.titulo}</span>
+          <span style={{ textDecoration: estaCompletada ? "line-through" : "none" }}>
+            {tarea.titulo}
+          </span>
           <button onClick={() => setEnEdicion(true)}>Editar</button>
           <button onClick={() => onEliminar(tarea.id)}>Eliminar</button>
         </>
