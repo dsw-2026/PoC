@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
-import type { Tarea, NuevaTarea } from "./types/Tarea";
+import { useEffect, useMemo, useState } from "react";
+import type { Tarea, ActualizarTarea, NuevaTarea } from "./types/Tarea";
+import type { EstadoFiltro } from "./types/Filtro";
 import { tareasApi } from "./api/tareas";
-import "./App.css";
+import  FilterBar from "./components/filterBar";
+import { TaskList } from "./components/TaskList";
 import { TaskForm } from "./components/TaskForm";
+import "./App.css";
 
-// Punto 1 (scaffold): esta pantalla solo valida que el mock de la API
-// responde correctamente. Los componentes (TaskForm, TaskList, FilterBar)
-// se arman en el siguiente paso.
 function App() {
   const [tareas, setTareas] = useState<Tarea[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState<EstadoFiltro>("todas");
 
   useEffect(() => {
     tareasApi
@@ -20,32 +21,58 @@ function App() {
       .finally(() => setCargando(false));
   }, []);
 
-  function handleCrear(nuevaTarea: NuevaTarea) {
+  const tareasFiltradas = useMemo(() => {
+    if (filtro === "todas") return tareas;
+    return tareas.filter((t) => t.estado === filtro);
+  }, [tareas, filtro]);
+
+  const handleCrear = (nuevaTarea: NuevaTarea) => {
     tareasApi
       .crear(nuevaTarea)
       .then((tareaCreada) => {
         setTareas((prev) => [...prev, tareaCreada]);
       })
       .catch((e) => setError(e.message));
-  }
+  };
+
+  const handleActualizar = (id: string, cambios: ActualizarTarea) => {
+    tareasApi
+      .actualizar(id, cambios)
+      .then((tareaActualizada) => {
+        setTareas((prev) =>
+          prev.map((t) => (t.id === id ? tareaActualizada : t))
+        );
+      })
+      .catch((e) => setError(e.message));
+  };
+
+  const handleEliminar = (id: string) => {
+    tareasApi
+      .eliminar(id)
+      .then(() => {
+        setTareas((prev) => prev.filter((t) => t.id !== id));
+      })
+      .catch((e) => setError(e.message));
+  };
 
   return (
     <main style={{ maxWidth: 480, margin: "2rem auto", fontFamily: "sans-serif" }}>
-      <h1>To-Do List (scaffold)</h1>
-      <p>Verificación de que la API mockeada con MSW responde correctamente.</p>
-
-      <TaskForm onCrear={handleCrear} />
+      <h1>To-Do List</h1>
 
       {cargando && <p>Cargando tareas...</p>}
       {error && <p style={{ color: "crimson" }}>Error: {error}</p>}
 
-      <ul>
-        {tareas.map((tarea) => (
-          <li key={tarea.id}>
-            <strong>{tarea.titulo}</strong> — {tarea.estado}
-          </li>
-        ))}
-      </ul>
+      {!cargando && !error && (
+        <>
+          <TaskForm onCrear={handleCrear} />
+          <FilterBar filtro={filtro} onFiltroChange={setFiltro} />
+          <TaskList
+            tareas={tareasFiltradas}
+            onEditar={handleActualizar}
+            onEliminar={handleEliminar}
+          />
+        </>
+      )}
     </main>
   );
 }
