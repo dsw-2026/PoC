@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import type { Tarea } from "./types/Tarea";
+import type { Tarea, NuevaTarea } from "./types/Tarea";
 import { tareasApi } from "./api/tareas";
 import "./App.css";
+import { TaskForm } from "./components/TaskForm";
 
 // Punto 1 (scaffold): esta pantalla solo valida que el mock de la API
 // responde correctamente. Los componentes (TaskForm, TaskList, FilterBar)
@@ -19,10 +20,21 @@ function App() {
       .finally(() => setCargando(false));
   }, []);
 
+  function handleCrear(nuevaTarea: NuevaTarea) {
+    tareasApi
+      .crear(nuevaTarea)
+      .then((tareaCreada) => {
+        setTareas((prev) => [...prev, tareaCreada]);
+      })
+      .catch((e) => setError(e.message));
+  }
+
   return (
     <main style={{ maxWidth: 480, margin: "2rem auto", fontFamily: "sans-serif" }}>
       <h1>To-Do List (scaffold)</h1>
       <p>Verificación de que la API mockeada con MSW responde correctamente.</p>
+
+      <TaskForm onCrear={handleCrear} />
 
       {cargando && <p>Cargando tareas...</p>}
       {error && <p style={{ color: "crimson" }}>Error: {error}</p>}
