@@ -10,7 +10,7 @@ function FilterBar({ filtro, onFiltroChange }: FilterBarProps) {
   const opciones: EstadoFiltro[] = ["todas", "pendiente", "completada"];
 
   return (
-    <div style={{ display: "flex", gap: "0.5rem", margin: "1rem 0" }}>
+    <div style={{ display: "flex", gap: "0.5rem", margin: "1rem 0", justifyContent: "center" }}>
       {opciones.map((opcion) => (
         <button
           key={opcion}
