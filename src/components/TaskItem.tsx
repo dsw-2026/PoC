@@ -12,6 +12,8 @@ export function TaskItem({ tarea, onEditar, onEliminar }: TaskItemProps) {
   const [tituloEditado, setTituloEditado] = useState(tarea.titulo);
   const [descripcionEditada, setDescripcionEditada] = useState(tarea.descripcion ?? "");
 
+  const completada = tarea.estado === "completada";
+
   function guardarEdicion() {
     onEditar(tarea.id, {
       titulo: tituloEditado,
@@ -20,7 +22,13 @@ export function TaskItem({ tarea, onEditar, onEliminar }: TaskItemProps) {
     setEnEdicion(false);
   }
 
-return (
+  function alternarCompletada() {
+    onEditar(tarea.id, {
+      estado: completada ? "pendiente" : "completada",
+    });
+  }
+
+  return (
     <li
       style={{
         display: "flex",
@@ -51,13 +59,30 @@ return (
         </>
       ) : (
         <>
-          <div style={{ flex: 1 }}>
-            <span>{tarea.titulo}</span>
-            {tarea.descripcion && (
-              <p style={{ margin: "0.25rem 0 0", color: "#aaa", fontSize: "0.9rem" }}>
-                {tarea.descripcion}
-              </p>
-            )}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem", flex: 1 }}>
+            <input
+              type="checkbox"
+              checked={completada}
+              onChange={alternarCompletada}
+              style={{ marginTop: "0.3rem" }}
+            />
+            <div style={{ textAlign: "left" }}>
+              <span style={{ textDecoration: completada ? "line-through" : "none" }}>
+                {tarea.titulo}
+              </span>
+              {tarea.descripcion && (
+                <p
+                  style={{
+                    margin: "0.25rem 0 0",
+                    color: "#aaa",
+                    fontSize: "0.9rem",
+                    textDecoration: completada ? "line-through" : "none",
+                  }}
+                >
+                  {tarea.descripcion}
+                </p>
+              )}
+            </div>
           </div>
           <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
             <button onClick={() => setEnEdicion(true)}>Editar</button>
